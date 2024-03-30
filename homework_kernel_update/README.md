@@ -1,5 +1,5 @@
 # Домашнее задание - обновление ядра Linux
-* После подготовки окружения и установки утилит создаем [Vagrantfile]() и запускаем виртуальную машину
+* После подготовки окружения и установки утилит создаем [Vagrantfile](https://github.com/aleksandraryutkin/otus-linux/blob/homework_kernel_update/homework_kernel_update/Vagrantfile) и запускаем виртуальную машину
 ``` bash
 root@[some_vm]:~# vagrant up
 Bringing machine 'kernel-update' up with 'virtualbox' provider...
