@@ -168,7 +168,7 @@ Generating grub configuration file ...
 done
 ```
 
-* Выбираем загрузку нового ядра по-умолчанию и перезашружаем ВМ
+* Выбираем загрузку нового ядра по-умолчанию и перезагружаем ВМ
 ``` bash
 [vagrant@kernel-update ~]$ sudo grub2-set-default 0
 [vagrant@kernel-update ~]$ sudo reboot
@@ -177,7 +177,7 @@ Connection to 127.0.0.1 closed by remote host.
 
 * Снова заходим и проверяем версию ядра. Видим, что установилась нужная
 ``` bash
-root@n[some_vm]:~# vagrant ssh
+root@[some_vm]:~# vagrant ssh
 Last login: Sun Mar 17 16:17:49 2024 from 10.0.2.2
 [vagrant@kernel-update ~]$ uname -r
 6.8.1-1.el8.elrepo.x86_64
@@ -207,7 +207,7 @@ linux-6.8.1.tar.xz                                            100%[=============
 [vagrant@kernel-update ~]$ cd linux-6.8.1
 ```
 
-* Далее необходим ряд действий, которые приведут к корректному заверщению команды make install. Сначала нужно поменять конфигурацию ядра и убрать ссылку на предварительную загрузку сертификатов
+* Далее необходим ряд действий, которые приведут к корректному завершению команды make install. Сначала нужно поменять конфигурацию ядра и убрать ссылку на предварительную загрузку сертификатов
 ``` bash
 [vagrant@kernel-update linux-6.8.1]$ make menuconfig
 
@@ -390,7 +390,7 @@ Generating grub configuration file ...
 done
 ```
 
-* Выбираем загрузку нового ядра по-умолчанию и перезашружаем ВМ
+* Выбираем загрузку нового ядра по-умолчанию и перезагружаем ВМ
 ``` bash
 [vagrant@kernel-update ~]$ sudo grub2-set-default 0
 [vagrant@kernel-update ~]$ sudo reboot
