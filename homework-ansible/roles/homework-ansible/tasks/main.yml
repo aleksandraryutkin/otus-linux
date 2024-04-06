@@ -1,0 +1,5 @@
+---
+# tasks file for homework-ansible
+
+- name: "Deploy nginx"
+  import_tasks: nginx.yml

@@ -1,0 +1,13 @@
+- name: NGINX install
+  hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+  tasks:
+    - name: Include the homework-ansible role
+      include_role:
+        name: homework-ansible
+      tags:
+        - update-apt
+        - nginx-package
+        - nginx-configuration

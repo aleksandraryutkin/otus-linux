@@ -1,0 +1,4 @@
+---
+# vars file for homework-ansible
+
+nginx_listen_port: 8080
