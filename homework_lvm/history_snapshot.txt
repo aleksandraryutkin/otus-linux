@@ -1,3 +1,5 @@
+Работа со снапшотами
+
 [root@lvm ~]# touch /home/file{1..20}
 
 [root@lvm ~]# lvcreate -L 100MB -s -n home_snap \

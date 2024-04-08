@@ -1,3 +1,5 @@
+На дисках попробовать поставить btrfs/zfs — с кешем, снапшотами и разметить там каталог /opt
+
 [root@lvm ~]#  lvcreate -n LogVol_Opt -L 950M /dev/VolGroup00
   Rounding up size to full physical extent 960.00 MiB
 WARNING: xfs_external_log signature detected on /dev/VolGroup00/LogVol_Opt at offset 8704. Wipe it? [y/n]: y
