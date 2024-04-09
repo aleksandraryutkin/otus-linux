@@ -1,0 +1,150 @@
+На дисках попробовать поставить btrfs/zfs — с кешем, снапшотами и разметить там каталог /opt
+
+[root@lvm ~]#  lvcreate -n LogVol_Opt -L 950M /dev/VolGroup00
+  Rounding up size to full physical extent 960.00 MiB
+WARNING: xfs_external_log signature detected on /dev/VolGroup00/LogVol_Opt at offset 8704. Wipe it? [y/n]: y
+  Wiping xfs_external_log signature on /dev/VolGroup00/LogVol_Opt.
+  Logical volume "LogVol_Opt" created.
+
+[root@lvm ~]# mkfs.btrfs /dev/VolGroup00/LogVol_Opt
+btrfs-progs v4.9.1
+See http://btrfs.wiki.kernel.org for more information.
+
+Label:              (null)
+UUID:               8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+Node size:          16384
+Sector size:        4096
+Filesystem size:    960.00MiB
+Block group profiles:
+  Data:             single            8.00MiB
+  Metadata:         DUP              48.00MiB
+  System:           DUP               8.00MiB
+SSD detected:       no
+Incompat features:  extref, skinny-metadata
+Number of devices:  1
+Devices:
+   ID        SIZE  PATH
+    1   960.00MiB  /dev/VolGroup00/LogVol_Opt
+
+[root@lvm ~]# mount /dev/VolGroup00/LogVol_Opt /mnt/
+
+[root@lvm ~]# cp -aR /opt/* /mnt/
+
+[root@lvm ~]# rm -rf /opt/*
+
+[root@lvm ~]# umount /mnt
+
+[root@lvm ~]# mount /dev/VolGroup00/LogVol_Opt /opt/
+
+[root@lvm ~]# echo "`blkid | grep Opt | awk '{print $2}'` \
+>  /opt btrfs defaults 0 0" >> /etc/fstab
+
+[root@lvm ~]# lsblk
+NAME                       MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda                          8:0    0   40G  0 disk
+├─sda1                       8:1    0    1M  0 part
+├─sda2                       8:2    0    1G  0 part /boot
+└─sda3                       8:3    0   39G  0 part
+  ├─VolGroup00-LogVol00    253:0    0    8G  0 lvm  /
+  ├─VolGroup00-LogVol01    253:1    0  1.5G  0 lvm  [SWAP]
+  ├─VolGroup00-LogVol_Home 253:2    0    2G  0 lvm  /home
+  └─VolGroup00-LogVol_Opt  253:8    0  960M  0 lvm  /opt
+sdb                          8:16   0   10G  0 disk
+sdc                          8:32   0    2G  0 disk
+├─vg_var-lv_var_rmeta_0    253:3    0    4M  0 lvm
+│ └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_0   253:4    0  952M  0 lvm
+  └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+sdd                          8:48   0    1G  0 disk
+├─vg_var-lv_var_rmeta_1    253:5    0    4M  0 lvm
+│ └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+└─vg_var-lv_var_rimage_1   253:6    0  952M  0 lvm
+  └─vg_var-lv_var          253:7    0  952M  0 lvm  /var
+sde                          8:64   0    1G  0 disk
+
+[root@lvm ~]# lvcreate -L 100MB -s -n opt_snap  /dev/VolGroup00/LogVol_Opt
+  Rounding up size to full physical extent 128.00 MiB
+  Logical volume "opt_snap" created.
+
+[root@lvm ~]# lsblk -f
+NAME                           FSTYPE      LABEL UUID                                   MOUNTPOINT
+sda
+├─sda1
+├─sda2                         xfs               570897ca-e759-4c81-90cf-389da6eee4cc   /boot
+└─sda3                         LVM2_member       vrrtbx-g480-HcJI-5wLn-4aOf-Olld-rC03AY
+  ├─VolGroup00-LogVol00        xfs               b5719d69-8e78-48f2-ad74-0d9f07c483a1   /
+  ├─VolGroup00-LogVol01        swap              c39c5bed-f37c-4263-bee8-aeb6a6659d7b   [SWAP]
+  ├─VolGroup00-LogVol_Home     xfs               8f810bb2-61f5-45d3-a676-397f86bc3501   /home
+  ├─VolGroup00-LogVol_Opt-real
+  │ ├─VolGroup00-LogVol_Opt    btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+  │ └─VolGroup00-opt_snap      btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62   /opt
+  └─VolGroup00-opt_snap-cow
+    └─VolGroup00-opt_snap      btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62   /opt
+sdb
+sdc                            LVM2_member       OMV1Jw-KUCE-yAxK-ae5n-YP31-NaL1-bdi8eT
+├─vg_var-lv_var_rmeta_0
+│ └─vg_var-lv_var              ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+└─vg_var-lv_var_rimage_0
+  └─vg_var-lv_var              ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+sdd                            LVM2_member       zdLgf0-1Uir-siUo-Dfk7-QfQo-IYg2-rQYQUt
+├─vg_var-lv_var_rmeta_1
+│ └─vg_var-lv_var              ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+└─vg_var-lv_var_rimage_1
+  └─vg_var-lv_var              ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+sde                            LVM2_member       SapWlC-qoMM-q1Lo-adR2-1FgD-QK1a-ps9U67
+
+[root@lvm ~]# lvcreate --type cache-pool VolGroup00 -n lv_opt_cache -L 10M
+  Rounding up size to full physical extent 32.00 MiB
+  Logical volume "lv_opt_cache" created.
+
+[root@lvm ~]# lvconvert --type cache --cache-pool VolGroup00/lv_opt_cache VolGroup00/LogVol_Opt
+Do you want wipe existing metadata of cache pool VolGroup00/lv_opt_cache? [y/n]: y
+  Logical volume VolGroup00/LogVol_Opt is now cached.
+
+[root@lvm ~]# lvs
+  Unknown feature in status: 8 13/8192 128 15/512 197 319 0 0 0 15 0 3 metadata2 writethrough no_discard_passdown 2 migration_threshold 2048 smq 0 rw -
+  LV          VG         Attr       LSize   Pool           Origin             Data%  Meta%  Move Log Cpy%Sync Convert
+  LogVol00    VolGroup00 -wi-ao----   8.00g
+  LogVol01    VolGroup00 -wi-ao----   1.50g
+  LogVol_Home VolGroup00 -wi-ao----   2.00g
+  LogVol_Opt  VolGroup00 owi-aoC--- 960.00m [lv_opt_cache] [LogVol_Opt_corig] 2.93   0.16            0.00
+  lvol0       VolGroup00 -wi-------  32.00m
+  lvol1       VolGroup00 -wi-------  32.00m
+  opt_snap    VolGroup00 swi-a-s--- 128.00m                LogVol_Opt         0.09
+  lv_var      vg_var     rwi-aor--- 952.00m                                                          100.00
+
+[root@lvm ~]# lsblk -f
+NAME                              FSTYPE      LABEL UUID                                   MOUNTPOINT
+sda
+├─sda1
+├─sda2                            xfs               570897ca-e759-4c81-90cf-389da6eee4cc   /boot
+└─sda3                            LVM2_member       vrrtbx-g480-HcJI-5wLn-4aOf-Olld-rC03AY
+  ├─VolGroup00-LogVol00           xfs               b5719d69-8e78-48f2-ad74-0d9f07c483a1   /
+  ├─VolGroup00-LogVol01           swap              c39c5bed-f37c-4263-bee8-aeb6a6659d7b   [SWAP]
+  ├─VolGroup00-LogVol_Home        xfs               8f810bb2-61f5-45d3-a676-397f86bc3501   /home
+  ├─VolGroup00-lv_opt_cache_cdata
+  │ └─VolGroup00-LogVol_Opt-real
+  │   ├─VolGroup00-LogVol_Opt     btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62   /opt
+  │   └─VolGroup00-opt_snap       btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+  ├─VolGroup00-opt_snap-cow
+  │ └─VolGroup00-opt_snap         btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+  ├─VolGroup00-lv_opt_cache_cmeta
+  │ └─VolGroup00-LogVol_Opt-real
+  │   ├─VolGroup00-LogVol_Opt     btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62   /opt
+  │   └─VolGroup00-opt_snap       btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+  └─VolGroup00-LogVol_Opt_corig
+    └─VolGroup00-LogVol_Opt-real
+      ├─VolGroup00-LogVol_Opt     btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62   /opt
+      └─VolGroup00-opt_snap       btrfs             8c9ed34f-baa0-4bf3-be8a-b3553740ba62
+sdb
+sdc                               LVM2_member       OMV1Jw-KUCE-yAxK-ae5n-YP31-NaL1-bdi8eT
+├─vg_var-lv_var_rmeta_0
+│ └─vg_var-lv_var                 ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+└─vg_var-lv_var_rimage_0
+  └─vg_var-lv_var                 ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+sdd                               LVM2_member       zdLgf0-1Uir-siUo-Dfk7-QfQo-IYg2-rQYQUt
+├─vg_var-lv_var_rmeta_1
+│ └─vg_var-lv_var                 ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+└─vg_var-lv_var_rimage_1
+  └─vg_var-lv_var                 ext4              16d08d90-e47f-4bbf-a6eb-9217138d6b09   /var
+sde                               LVM2_member       SapWlC-qoMM-q1Lo-adR2-1FgD-QK1a-ps9U67
