@@ -1,0 +1,5 @@
+---
+# tasks file for homework-ansible
+
+- name: "Service 30 seconds monitoring"
+  import_tasks: service_30.yml

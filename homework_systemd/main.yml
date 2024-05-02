@@ -1,0 +1,11 @@
+- name: Systemd homework
+  hosts: all
+  become: true
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+  tasks:
+    - name: Include the homework-systemd role
+      include_role:
+        name: homework-systemd
+      tags:
+        - service_30

@@ -1,0 +1,47 @@
+---
+# tasks file for homework-systemd
+
+- name: Create config file
+  copy:
+    src: files/watchlog
+    dest: /etc/sysconfig/watchlog
+  tags:
+    - service_30
+
+- name: Create log file
+  copy:
+    src: files/watchlog.log
+    dest: /var/log/watchlog.log
+  tags:
+    - service_30
+
+- name: Add script to find logs
+  copy:
+    src: files/watchlog.sh
+    dest: /opt/watchlog.sh
+    mode: u+x
+  tags:
+    - service_30
+
+#- name: Make script executable
+#  command: chmod +x /opt/watchlog.sh
+#  notify:
+#    - reload nginx
+#  tags:
+#    - service_30
+
+- name: Create unit for service
+  copy:
+    src: files/watchlog.service
+    dest: /etc/systemd/system/watchlog.service
+  tags:
+    - service_30
+
+- name: Create unit for timer
+  copy:
+    src: files/watchlog.timer
+    dest: /etc/systemd/system/watchlog.timer
+  notify:
+    - start timer
+  tags:
+    - service_30
