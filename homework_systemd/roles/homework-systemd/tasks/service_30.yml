@@ -34,8 +34,6 @@
   copy:
     src: files/watchlog.service
     dest: /etc/systemd/system/watchlog.service
-  notify:
-    - start service
   tags:
     - service_30
 
@@ -45,5 +43,6 @@
     dest: /etc/systemd/system/watchlog.timer
   notify:
     - start timer
+    - start service
   tags:
     - service_30
