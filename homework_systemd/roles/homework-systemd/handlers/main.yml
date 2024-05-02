@@ -1,9 +1,13 @@
 ---
 # handlers file for homework-ansible
 
+- name: start service
+  systemd:
+    name: watchlog.service
+    state: started
+
 - name: start timer
   systemd:
     name: watchlog.timer
     state: started
-    enabled: yes
 

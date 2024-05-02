@@ -328,3 +328,19 @@ Listen 8080
 tcp     LISTEN   0        128                    *:8080                *:*       users:(("httpd",pid=23018,fd=4),("httpd",pid=23017,fd=4),("httpd",pid=23016,fd=4),("httpd",pid=23013,fd=4))
 tcp     LISTEN   0        128                    *:80                  *:*       users:(("httpd",pid=22796,fd=4),("httpd",pid=22795,fd=4),("httpd",pid=22794,fd=4),("httpd",pid=22790,fd=4))
 ```
+
+
+
+root@nginx-test-first-outline:/src# vagrant ssh-config
+Host packages
+  HostName 127.0.0.1
+  User vagrant
+  Port 2222
+  UserKnownHostsFile /dev/null
+  StrictHostKeyChecking no
+  PasswordAuthentication no
+  IdentityFile /src/.vagrant/machines/packages/virtualbox/private_key
+  IdentitiesOnly yes
+  LogLevel FATAL
+  PubkeyAcceptedKeyTypes +ssh-rsa
+  HostKeyAlgorithms +ssh-rsa
