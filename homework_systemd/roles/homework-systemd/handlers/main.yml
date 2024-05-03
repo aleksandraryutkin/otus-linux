@@ -15,3 +15,13 @@
   systemd:
     name: spawn-fcgi.service
     state: started
+
+- name: start httpd-first
+  systemd:
+    name: httpd@first
+    state: started
+
+- name: start httpd-second
+  systemd:
+    name: httpd@second
+    state: started

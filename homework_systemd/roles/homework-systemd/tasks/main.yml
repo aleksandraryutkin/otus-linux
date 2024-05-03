@@ -6,3 +6,6 @@
 
 - name: "Rewrite spawn-fcgi to unit file"
   import_tasks: rewrite_spawn-fcgi.yml
+
+- name: "Apache two servers"
+  import_tasks: apache.yml

@@ -365,4 +365,12 @@ root@[some_vm]:/src/otus-linux/homework_systemd# ansible-playbook main.yml
 [root@systemd ~]#  tail -f /var/log/messages
 ```
 
-* 
+* Проверяем статус  `spawn-fcgi` юнита
+``` bash
+[root@systemd ~]# systemctl status spawn-fcgi
+```
+
+* Cмотрим, какие порты слушаются у apache:
+``` bash
+[root@systemd ~]# ss -tnulp | grep httpd
+```
