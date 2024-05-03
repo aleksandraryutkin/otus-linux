@@ -1,5 +1,5 @@
 ---
-# tasks file for homework-systemd
+# tasks file for launch check logs every 30 seconds
 
 - name: Create config file
   copy:
@@ -22,13 +22,6 @@
     mode: u+x
   tags:
     - service_30
-
-#- name: Make script executable
-#  command: chmod +x /opt/watchlog.sh
-#  notify:
-#    - reload nginx
-#  tags:
-#    - service_30
 
 - name: Create unit for service
   copy:

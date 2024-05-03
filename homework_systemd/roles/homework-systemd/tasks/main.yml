@@ -3,3 +3,6 @@
 
 - name: "Service 30 seconds monitoring"
   import_tasks: service_30.yml
+
+- name: "Rewrite spawn-fcgi to unit file"
+  import_tasks: rewrite_spawn-fcgi.yml

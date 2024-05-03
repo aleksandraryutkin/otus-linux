@@ -11,3 +11,7 @@
     name: watchlog.service
     state: started
 
+- name: start spawn-fcgi
+  systemd:
+    name: spawn-fcgi.service
+    state: started

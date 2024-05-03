@@ -9,3 +9,4 @@
         name: homework-systemd
       tags:
         - service_30
+        - spawn-fcgi
