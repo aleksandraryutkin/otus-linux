@@ -1,0 +1,37 @@
+---
+# tasks file for rewrite spawn-fcgi to unit file
+
+- name: Install EPEL repository
+  yum:
+    name: epel-release
+    state: present
+  tags:
+    - spawn-fcgi
+
+- name: Install spawn-fcgi and required packages
+  yum:
+    name:
+      - spawn-fcgi
+      - php
+      - php-cli
+      - mod_fcgid
+      - httpd
+    state: present
+  tags:
+    - spawn-fcgi
+
+- name: Add spawn-fcgi config
+  copy:
+    src: files/spawn-fcgi
+    dest: /etc/sysconfig/spawn-fcgi
+  tags:
+    - spawn-fcgi
+
+- name: Create unit for spawn-fcgi
+  copy:
+    src: files/spawn-fcgi.service
+    dest: /etc/systemd/system/spawn-fcgi.service
+  notify:
+    - start spawn-fcgi
+  tags:
+    - spawn-fcgi

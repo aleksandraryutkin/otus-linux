@@ -1,0 +1,25 @@
+---
+# tasks file for apache two servers
+
+- name: Add httpd configs
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "files/httpd-first", dest: "/etc/sysconfig/httpd-first" }
+    - { src: "files/httpd-second", dest: "/etc/sysconfig/httpd-second" }
+  tags:
+    - apache
+
+- name: Add apache configs and start services
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "files/first.conf", dest: "/etc/httpd/conf/first.conf" }
+    - { src: "files/second.conf", dest: "/etc/httpd/conf/second.conf" }
+  notify:
+    - start httpd-first
+    - start httpd-second
+  tags:
+    - apache

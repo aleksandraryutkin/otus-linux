@@ -1,0 +1,27 @@
+---
+# handlers file for homework-ansible
+
+- name: start timer
+  systemd:
+    name: watchlog.timer
+    state: started
+
+- name: start service
+  systemd:
+    name: watchlog.service
+    state: started
+
+- name: start spawn-fcgi
+  systemd:
+    name: spawn-fcgi.service
+    state: started
+
+- name: start httpd-first
+  systemd:
+    name: httpd@first
+    state: started
+
+- name: start httpd-second
+  systemd:
+    name: httpd@second
+    state: started
