@@ -28,4 +28,4 @@ root@otus:~# apt install nginx
 root@otus:~# nginx -s reload
 ```
 * На Google почту отправить письмо не удалось, потому что Google требует дополнительную авторизацию, отправка корректно отработала на почту yandex
-* ![Пример письма](image.png)
+* ![Пример письма](images/image.png)
