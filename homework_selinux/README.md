@@ -1,9 +1,9 @@
 # Домашнее задание - Практика с SELinux
 
 ## Подготовительные действия
-* Развернуть виртуальную машину `через vagrant up`, сконфигурированную в `Vagrantfile`.
+* Развернуть виртуальную машину через `vagrant up`, сконфигурированную в `Vagrantfile`.
 * Так как на данный момент зеркало `mirrorlist.centos.org` перестало поддерживаться, то найден образ у вагранта, который использует другое хранилище пакетов - `vault.centos.org`.
-* В данном образе `selinux` в статусе `Permissive`, поэтому чтобы воспроизвести ситуацию, описанную в методичке, добавлена команда по включению политик `selinux` - ]`setenforce 1`.
+* В данном образе `SELinux` в статусе `Permissive`, поэтому чтобы воспроизвести ситуацию, описанную в методичке, добавлена команда по включению политик `selinux` - `setenforce 1`.
 * После создания машины и запуска nginx будет такой вывод:  
 ``` bash
 root@[some_vm]:/src# vagrant up
@@ -74,7 +74,7 @@ type=SYSCALL msg=audit(1721562784.066:862): arch=c000003e syscall=49 success=no 
 type=SERVICE_START msg=audit(1721562784.081:863): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=nginx comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
 ```  
 
-* Устанавливаем утилиту `audit2why`
+* Устанавливаем утилиту `audit2why`:
 ``` bash
 [root@selinux ~]# yum update
 [root@selinux ~]# yum install policycoreutils-python
@@ -93,9 +93,9 @@ type=AVC msg=audit(1721562784.066:862): avc:  denied  { name_bind } for  pid=318
 	Allow access by executing:
 	# setsebool -P nis_enabled 1
 ```  
-Утилита audit2why покажет почему трафик блокируется. Исходя из вывода утилиты, мы видим, что нам нужно поменять параметр nis_enabled.  
+Утилита `audit2why` покажет почему трафик блокируется. Исходя из вывода утилиты, мы видим, что нам нужно поменять параметр `nis_enabled`.  
 
-* Включим параметр nis_enabled и перезапустим nginx:
+* Включим параметр `nis_enabled` и перезапустим `nginx`:
 ``` bash
 [root@selinux ~]# setsebool -P nis_enabled on
 [root@selinux ~]# systemctl restart nginx
@@ -118,7 +118,7 @@ Jul 21 13:49:21 selinux nginx[1941]: nginx: configuration file /etc/nginx/nginx.
 Jul 21 13:49:21 selinux systemd[1]: Started The nginx HTTP and reverse proxy server.
 ```  
 
-* Проверяем работу nginx (проверяю через curl, так как делаю на отдельно виртуальной машине)
+* Проверяем работу `nginx` (проверяю через `curl`, так как делаю на отдельно виртуальной машине)
 ``` bash
 [root@selinux ~]# curl -I http://127.0.0.1:4881
 HTTP/1.1 200 OK
@@ -138,7 +138,7 @@ Accept-Ranges: bytes
 nis_enabled --> on
 ```  
 
-* Возвращаем обратно запрет работы nginx на порту 4881:
+* Возвращаем обратно запрет работы `nginx` на порту 4881:
 ``` bash
 [root@selinux ~]# setsebool -P nis_enabled off
 ```  
@@ -167,7 +167,7 @@ Jul 21 13:54:28 selinux systemd[1]: nginx.service failed.
 ```  
 
 #### Разрешим в SELinux работу nginx на порту TCP 4881 c помощью добавления нестандартного порта в имеющийся тип
-* Поиск имеющегося типа, для http трафика:
+* Поиск имеющегося типа, для `http` трафика:
 ``` bash
 [root@selinux ~]# semanage port -l | grep http
 http_cache_port_t              tcp      8080, 8118, 8123, 10001-10010
@@ -177,7 +177,7 @@ pegasus_http_port_t            tcp      5988
 pegasus_https_port_t           tcp      5989
 ```  
 
-* Добавим порт в тип http_port_t:
+* Добавим порт в тип `http_port_t`:
 ``` bash
 [root@selinux ~]# semanage port -a -t http_port_t -p tcp 4881
 [root@selinux ~]#  semanage port -l | grep  http_port_t
@@ -185,7 +185,7 @@ http_port_t                    tcp      4881, 80, 81, 443, 488, 8008, 8009, 8443
 pegasus_http_port_t            tcp      5988
 ```  
 
-* Теперь перезапустим службу nginx и проверим её работу:
+* Теперь перезапустим службу `nginx` и проверим её работу:
 ``` bash
 [root@selinux ~]# systemctl restart nginx
 [root@selinux ~]# systemctl status nginx
@@ -250,14 +250,14 @@ Jul 21 13:54:28 selinux systemd[1]: nginx.service failed.
 ```  
 
 #### Разрешим в SELinux работу nginx на порту TCP 4881 c помощью формирования и установки модуля SELinux:
-* Попробуем снова запустить nginx:
+* Попробуем снова запустить `nginx`:
 ``` bash
 [root@selinux ~]# systemctl start nginx
 Job for nginx.service failed because the control process exited with error code. See "systemctl status nginx.service" and "journalctl -xe" for details.
 ```  
-Nginx не запуститься, так как SELinux продолжает его блокировать.  
+`Nginx` не запуститься, так как `SELinux` продолжает его блокировать.  
 
-* Посмотрим логи SELinux, которые относятся к nginx: 
+* Посмотрим логи `SELinux`, которые относятся к `nginx`: 
 ``` bash
 [root@selinux ~]# grep nginx /var/log/audit/audit.log
 ...
@@ -266,7 +266,7 @@ type=SYSCALL msg=audit(1721572756.409:1079): arch=c000003e syscall=49 success=no
 type=SERVICE_START msg=audit(1721572756.424:1080): pid=1 uid=0 auid=4294967295 ses=4294967295 subj=system_u:system_r:init_t:s0 msg='unit=nginx comm="systemd" exe="/usr/lib/systemd/systemd" hostname=? addr=? terminal=? res=failed'
 ```  
 
-* Воспользуемся утилитой `audit2allow` для того, чтобы на основе логов SELinux сделать модуль, разрешающий работу nginx на нестандартном порту: 
+* Воспользуемся утилитой `audit2allow` для того, чтобы на основе логов `SELinux` сделать модуль, разрешающий работу `nginx` на нестандартном порту: 
 ``` bash
 [root@selinux ~]# grep nginx /var/log/audit/audit.log | audit2allow -M nginx
 ******************** IMPORTANT ***********************
@@ -281,7 +281,7 @@ semodule -i nginx.pp
 [root@selinux ~]#
 ```  
 
-* Попробуем снова запустить nginx:
+* Попробуем снова запустить `nginx`:
 ``` bash
 [root@selinux ~]# systemctl start nginx
 [root@selinux ~]# systemctl status nginx
@@ -302,7 +302,7 @@ Jul 21 14:52:54 selinux nginx[2158]: nginx: the configuration file /etc/nginx/ng
 Jul 21 14:52:54 selinux nginx[2158]: nginx: configuration file /etc/nginx/nginx.conf test is successful
 Jul 21 14:52:54 selinux systemd[1]: Started The nginx HTTP and reverse proxy server.
 ```  
-После добавления модуля nginx запустился без ошибок. При использовании модуля изменения сохранятся после перезагрузки.  
+После добавления модуля `nginx` запустился без ошибок. При использовании модуля изменения сохранятся после перезагрузки.  
 
 * Для удаления модуля воспользуемся командой:
 ``` bash
@@ -410,7 +410,7 @@ update failed: SERVFAIL
 >quit
 ```  
 Изменения внести не получилось. 
-* Посмотрим логи SELinux, чтобы понять в чём может быть проблема. Для этого воспользуемся утилитой audit2why:
+* Посмотрим логи `SELinux`, чтобы понять в чём может быть проблема. Для этого воспользуемся утилитой `audit2why`:
 ``` bash
 [vagrant@client ~]$ sudo -i
 [root@client ~]# cat /var/log/audit/audit.log | audit2why
@@ -418,7 +418,7 @@ update failed: SERVFAIL
 ```  
 Тут мы видим, что на клиенте отсутствуют ошибки.  
 
-* Не закрывая сессию на клиенте, подключимся к серверу ns01 и проверим логи SELinux:
+* Не закрывая сессию на клиенте, подключимся к серверу `ns01` и проверим логи `SELinux`:
 ``` bash
 root@[some_vm]:/src/otus-linux-adm/selinux_dns_problems# vagrant ssh ns01
 Last login: Mon Jul 22 17:53:34 2024 from 10.0.2.2
@@ -450,7 +450,7 @@ drw-rwx---. root named unconfined_u:object_r:etc_t:s0   dynamic
 ```  
 Тут мы также видим, что контекст безопасности неправильный. Проблема заключается в том, что конфигурационные файлы лежат в другом каталоге.  
 
-* Посмотреть в каком каталоги должны лежать, файлы, чтобы на них распространялись правильные политики SELinux можно с помощью команды:
+* Посмотреть в каком каталоги должны лежать, файлы, чтобы на них распространялись правильные политики `SELinux` можно с помощью команды:
 ``` bash
 [root@ns01 ~]# semanage fcontext -l | grep named
 /etc/rndc.*                                        regular file       system_u:object_r:named_conf_t:s0
@@ -511,7 +511,7 @@ ns01.dns.lab.		3600	IN	A	192.168.50.10
 ```  
 Видим, что изменения применились.  
 
-* Попробуем перезагрузить хосты и ещё раз сделать запрос с помощью dig:
+* Попробуем перезагрузить хосты и ещё раз сделать запрос с помощью `dig`:
 ``` bash
 [root@client ~]# logout
 [vagrant@client ~]$ logout
