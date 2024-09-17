@@ -261,3 +261,6 @@ Sep 16 05:34:04 sender systemd[1]: systemd-timedated.service: Deactivated succes
 ``` bash
 root@[some_vm]:/src# vagrant up
 ```
+
+* Проверяем отправку логов все также - заходим сначала на машину web и отправляем curl запрос, потом заходим на машину log и проверяем наличие папок и содержание файлов:
+![alt text](images/image4.png)
