@@ -1,0 +1,89 @@
+---
+- hosts: web
+  become: true
+  tasks:
+    - name: Install nginx
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Add syslog configuration to nginx.conf
+      blockinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: "http {"
+        block: |
+          access_log syslog:server=192.168.56.15:514,tag=nginx_access,severity=info combined;
+          error_log syslog:server=192.168.56.15:514,tag=nginx_error;
+      notify: reload nginx
+
+  handlers:
+    - name: reload nginx
+      service:
+        name: nginx
+        state: reloaded
+
+- hosts: log
+  become: true
+  tasks:
+    - name: Uncomment UDP module in rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: present
+        regexp: '^#(module\(load="imudp"\))'
+        line: 'module(load="imudp")'
+
+    - name: Uncomment UDP input in rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: present
+        regexp: '^#(input\(type="imudp" port="514"\))'
+        line: 'input(type="imudp" port="514")'
+
+    - name: Uncomment TCP module in rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: present
+        regexp: '^#(module\(load="imtcp"\))'
+        line: 'module(load="imtcp")'
+
+    - name: Uncomment TCP input in rsyslog.conf
+      lineinfile:
+        path: /etc/rsyslog.conf
+        state: present
+        regexp: '^#(input\(type="imtcp" port="514"\))'
+        line: 'input(type="imtcp" port="514")'
+
+    - name: Add remote logs template to rsyslog.conf
+      blockinfile:
+        path: /etc/rsyslog.conf
+        block: |
+          # Add remote logs
+          $template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
+          *.* ?RemoteLogs
+          & ~
+        insertafter: EOF
+      notify: restart rsyslog
+
+  handlers:
+    - name: restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
+
+- hosts: sender
+  become: true
+  tasks:
+    - name: Add remote logs template to rsyslog.conf
+      blockinfile:
+        path: /etc/rsyslog.conf
+        block: |
+          *.* @@192.168.56.15:514
+        insertafter: EOF
+      notify: restart rsyslog
+
+  handlers:
+    - name: restart rsyslog
+      service:
+        name: rsyslog
+        state: restarted
